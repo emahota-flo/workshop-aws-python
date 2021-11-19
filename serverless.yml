@@ -15,6 +15,13 @@ provider:
 functions:
   hello:
     handler: handler.hello
+    timeout: 30
+    events:
+      - http:
+          path: api/hello
+          method: get
+          integration: lambda
+          cors: true
 
 
 plugins:
