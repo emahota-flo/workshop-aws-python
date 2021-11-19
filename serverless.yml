@@ -11,6 +11,7 @@ provider:
   environment:
     TEST_ENV: ${file(env.yml):${opt:stage, self:provider.stage}.TEST_ENV}
     FILE_LIST_TABLE: ${file(env.yml):${opt:stage, self:provider.stage}.FILE_LIST_TABLE}
+    BUCKET_NAME: ${file(env.yml):${opt:stage, self:provider.stage}.BUCKET_NAME}
 
   iamRoleStatements:
     - Effect: Allow
@@ -18,6 +19,10 @@ provider:
         - dynamodb:*
       Resource:
         - arn:aws:dynamodb:*:*:table/${file(env.yml):${opt:stage, self:provider.stage}.FILE_LIST_TABLE}
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: "*"
 
 functions:
   hello:
@@ -47,6 +52,15 @@ functions:
           method: get
           integration: lambda
           cors: true
+  createFile:
+    handler: api/s3/handler.createFile
+    timeout: 30
+    events:
+      - http:
+          path: api/s3/createFile
+          method: post
+          integration: lambda
+          cors: true
 
 resources:
   Resources:
@@ -63,6 +77,10 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${file(env.yml):${opt:stage, self:provider.stage}.BUCKET_NAME}
 
 plugins:
   - serverless-offline
