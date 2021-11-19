@@ -6,10 +6,16 @@ provider:
   name: aws
   runtime: python3.8
   lambdaHashingVersion: 20201221
-
+  region: us-east-1
+  profile: workshop-test
+  environment:
+    TEST_ENV: ${file(env.yml):${opt:stage, self:provider.stage}.TEST_ENV}
 
 
 functions:
   hello:
     handler: handler.hello
 
+
+plugins:
+  - serverless-offline
